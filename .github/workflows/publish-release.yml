@@ -4,6 +4,12 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., v1.0.0)'
+        required: true
+        type: string
 
 jobs:
   build:
@@ -26,7 +32,11 @@ jobs:
 
     - name: Create Release Artifact
       run: |
-        $tag = '${{ github.ref }}'.Replace('refs/tags/', '')
+        if ('${{ github.event_name }}' -eq 'workflow_dispatch') {
+          $tag = '${{ inputs.version }}'
+        } else {
+          $tag = '${{ github.ref }}'.Replace('refs/tags/', '')
+        }
         $artifactName = "NetLimiterBridge-$tag-win-x64.zip"
         Compress-Archive -Path NetLimiterBridge\bin\Release\NetLimiterBridge.exe -DestinationPath $artifactName
         echo "ARTIFACT_NAME=$artifactName" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
@@ -36,5 +46,6 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         files: ${{ env.ARTIFACT_PATH }}
+        tag_name: ${{ github.event.inputs.version || github.ref_name }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
