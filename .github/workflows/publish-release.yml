@@ -28,7 +28,7 @@ jobs:
       run: nuget restore NetLimiterBridge.slnx
 
     - name: Build Release
-      run: msbuild NetLimiterBridge.slnx /p:Configuration=Release /p:Platform=x64
+      run: msbuild NetLimiterBridge.slnx /p:Configuration=Release /p:Platform="AnyCPU"
 
     - name: Create Release Artifact
       run: |
