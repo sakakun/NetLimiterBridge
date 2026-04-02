@@ -33,6 +33,10 @@ jobs:
     - name: Build Release
       run: msbuild NetLimiterBridge.slnx /p:Configuration=Release /p:Platform="Any CPU"
 
+    - name: Copy NLInterop.dll to Release output
+      run: |
+        Copy-Item -Path "NetLimiterBridge\NLInterop.dll" -Destination "NetLimiterBridge\bin\Release\" -Force
+
     - name: Create Release Artifact
       run: |
         if ('${{ github.event_name }}' -eq 'workflow_dispatch') {
@@ -41,8 +45,7 @@ jobs:
           $tag = '${{ github.ref }}'.Replace('refs/tags/', '')
         }
         $artifactName = "NetLimiterBridge-$tag-win-x64.zip"
-        Compress-Archive -Path NetLimiterBridge\bin\Release\NetLimiterBridge.exe -DestinationPath $artifactName
-        echo "ARTIFACT_NAME=$artifactName" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+        Compress-Archive -Path NetLimiterBridge\bin\Release\* -DestinationPath $artifactName
         echo "ARTIFACT_PATH=$artifactName" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
     - name: Create GitHub Release
